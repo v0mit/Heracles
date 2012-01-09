@@ -1,0 +1,57 @@
+  _    _                     _
+ | |  | |                   | |
+ | |__| | ___ _ __ __ _  ___| | ___ ___
+ |  __  |/ _ \ '__/ _` |/ __| |/ _ | __|
+ | |  | |  __/ | | (_| | (__| |  __|__ \
+ |_|  |_|\___|_|  \__,_|\___|_|\___|___/
+
+
+usage: Heracles.py [-h] [-f FORM] [-t MAX_THREADS] [-l LOGINS_FILE]
+                   [-p PASSWD_FILE] [-d DICTIONARY_FILE] [-o OUTPUT_FILE]
+                   [--verbose VERBOSE] [-a PROXY_FILE] [-A PROXY]
+                   host protocol
+
+HTTP Basic Access Authentication(http-ba)
+Example HTTP Basic Access Authentication attack:
+python Heracles.py http://darkpy.net/protected http-ba -d dictionary.txt -a proxies.txt
+HOST:http://darkpy.net/protected   #Protected page
+PROTOCOL:http-ba
+DICTIONARY_FILE:dictionary.txt      #List of usernames:passwords
+PROXY_FILE:proxies.txt              #List of ip/address:port
+
+
+
+HTTP Form Post(http-form-post)
+<form action="login.php" method="post">
+    <input type="text" name="username"><br>
+    <input type="password" name="password"><br>
+    <input type="submit" value="Login" name="Login">
+</form>
+
+From this form you can extract the info needed:
+    Login=Login&username=*USER*&password=*PASSWD*
+
+*USER* and *PASSWD* are where the username and password goes, they will be
+replaced by a user and password during the attack.
+
+Example HTTP Form Post attack:
+python Heracles.py http://darkpy.net/protected http-form-post -f "username=*USER*&password=*PASSWD*&Login=Login:Login failed" -d dictionary.txt -a proxies.txt
+HOST:http://darkpy.net/protected   #Protected page
+PROTOCOL:http-form-post
+FORM:"username=*USER*&password=*PASSWD*&Login=Login:Login failed"
+The form parameter should be formatted like this "PARAMETERS:BAD STRING".
+BAD STRING should be something on the website that is displayed on a bad login.
+Like "Login Failed", "Bad Password" etc. You can also use several different
+string like this "BAD STRING1|BAD STRING2|BAD STRING3"
+DICTIONARY_FILE:dictionary.txt      #List of usernames:passwords
+PROXY_FILE:proxies.txt              #List of ip/address:port
+
+
+
+FTP
+Example FTP attack:
+python Heracles.py ftp.server.com ftp -d dictionary.txt -a proxies.txt
+HOST:ftp.server.com ftp   #FTP Server
+PROTOCOL:ftp
+DICTIONARY_FILE:dictionary.txt      #List of usernames:passwords
+PROXY_FILE:proxies.txt              #List of ip/address:port

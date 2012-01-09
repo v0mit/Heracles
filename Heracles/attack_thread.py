@@ -12,8 +12,12 @@ import threading, logging, Queue, sys
 class AttackThread(threading.Thread):
     def __init__(self, attack_q, attack_object, l_lvl=20):
         super(AttackThread, self).__init__()
-        logging.basicConfig(stream=sys.stderr, level=l_lvl,
-            format='[%(levelname)s] (Thread-%(thread)d) %(message)s')
+        if l_lvl == 10:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] (%(thread)d) %(message)s')
+        else:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] %(message)s')
 
         self.attack_q = attack_q
         self.attack_object = attack_object

@@ -10,8 +10,12 @@ import urllib, urllib2, base64, httplib, logging, sys
 
 class http_handler():
     def __init__(self, proxy=None, l_lvl=20):
-        logging.basicConfig(stream=sys.stderr, level=l_lvl,
-            format='[%(levelname)s] (%(thread)d) %(message)s')
+        if l_lvl == 10:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] (%(thread)d) %(message)s')
+        else:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] %(message)s')
 
         if proxy:
             self.install_proxy(proxy)
@@ -25,8 +29,9 @@ class http_handler():
     def request(self, url, auth=None, data=None):
         req = urllib2.Request(url)
 
-        base64string = base64.encodestring('%s:%s' % (auth[0], auth[1])).replace('\n', '')
-        req.add_header("Authorization", "Basic %s" % base64string)
+        if auth:
+            base64string = base64.encodestring('%s:%s' % (auth[0], auth[1])).replace('\n', '')
+            req.add_header("Authorization", "Basic %s" % base64string)
 
         req.add_header('User-Agent', self.user_agent)
 

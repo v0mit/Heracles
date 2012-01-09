@@ -13,9 +13,13 @@ from ftplib import FTP
 class AttackObject():
     def __init__(self, options, l_lvl=20):
         self.options = options
-        self.address = options.get("target_address")
-        logging.basicConfig(stream=sys.stderr, level=l_lvl,
-            format='[%(levelname)s] (%(thread)d) %(message)s')
+        self.address = options.get("host")
+        if l_lvl == 10:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] (%(thread)d) %(message)s')
+        else:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] %(message)s')
 
     def doLogin(self, user, passwd, proxy=None):
 

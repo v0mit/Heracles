@@ -7,17 +7,22 @@ Author(s):
     v0mit: v0mit@darkpy.net
 """
 
+__version__ = "1.1"
+
 import sys, argparse, logging, Queue, time, os
 from attack_thread import AttackThread
 
 class Heracles():
     def __init__(self):
-        parser = argparse.ArgumentParser(description="Heracles")
-        parser.add_argument('target_address', action='store',
-        help='Target address.', default=False)
+        parser = argparse.ArgumentParser(description="Heracles v{0}".format(__version__))
+        parser.add_argument("host", action="store",
+            help="Target host.", default=False)
 
         parser.add_argument("protocol", action="store", default=False,
-            help="Protocol: http-ba, HTTPFP, FTP, TN, SSH. See README for more information.")
+            help="Protocol: http-ba, http-form-post, ftp. See README for more information.")
+
+        parser.add_argument("-f", "--form", action="store", dest="form",
+            help="form", default=None)
 
         parser.add_argument("-t", "--threads", action="store", dest="max_threads",
             help="Max number of threads to use.", default=20, type=int)
@@ -45,7 +50,8 @@ class Heracles():
             help="Proxy", default=None)
 
         results = parser.parse_args()
-        self.options = {"target_address":results.target_address}
+        self.options = {"host":results.host}
+        self.options["form"] = results.form
         self.options["protocol"] = results.protocol
         self.options["max_threads"] = results.max_threads
         self.options["logins_file"] = results.logins_file
@@ -61,8 +67,12 @@ class Heracles():
         else:
             self.logging_lvl = 20
 
-        logging.basicConfig(stream=sys.stderr, level=self.logging_lvl,
-            format='[%(levelname)s] (%(thread)d) %(message)s')
+        if self.logging_lvl == 10:
+            logging.basicConfig(stream=sys.stderr, level=self.logging_lvl,
+                format='[%(levelname)s] (%(thread)d) %(message)s')
+        else:
+            logging.basicConfig(stream=sys.stderr, level=self.logging_lvl,
+                format='[%(levelname)s] %(message)s')
 
         #Checks if some of the shit is passed, if not exit.
         if not self.options.get("dictionary_file"):
@@ -122,9 +132,7 @@ class Heracles():
 
             return
 
-        self.proxy.append(None)
-
-        self.proxy_len = len(self.proxy)
+        self.proxy = [None for i in range(len(self.login_details))]
 
     def loadLogins(self):
         self.login_details = []
@@ -142,11 +150,13 @@ class Heracles():
                 logging.error(errno)
                 sys.exit(1)
 
+            passwds = [passwd.strip() for passwd in passwd_file]
             for user in logins_file:
                 user = user.strip()
-                for passwd in passwd_file:
-                    passwd = passwd.strip()
+                for passwd in passwds:
+                    passwd = passwd
                     self.login_details.append((user, passwd))
+
 
             logging.info("{0} user:pass loaded.".format(
                 len(self.login_details)))
@@ -188,7 +198,7 @@ class Heracles():
                 self.options.get("protocol")))
 
         logging.info("Starting attack against {0}".format(
-            self.options.get("target_address")))
+            self.options.get("host")))
 
         attack_queue = Queue.Queue()
 
@@ -209,11 +219,8 @@ class Heracles():
                 idx += 1
             except IndexError as errno:
                 break
-            #time.sleep(1)
 
         attack_queue.join()
-
-        #attack_queue.put((self.login_details.pop(), None))
 
 
 if __name__ == "__main__":

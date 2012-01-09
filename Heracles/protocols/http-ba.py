@@ -12,9 +12,16 @@ import Heracles.http_handler, logging, sys
 class AttackObject():
     def __init__(self, options, l_lvl=20):
         self.options = options
-        self.url = options.get("target_address")
-        logging.basicConfig(stream=sys.stderr, level=l_lvl,
-            format='[%(levelname)s] (%(thread)d) %(message)s')
+        self.url = options.get("host")
+        if not self.url.startswith("http://"):
+            self.url = "http://"+self.url
+
+        if l_lvl == 10:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] (%(thread)d) %(message)s')
+        else:
+            logging.basicConfig(stream=sys.stderr, level=l_lvl,
+                format='[%(levelname)s] %(message)s')
 
     def doLogin(self, user, passwd, proxy=None):
         if proxy:
