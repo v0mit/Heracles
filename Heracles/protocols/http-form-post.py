@@ -62,7 +62,12 @@ class AttackObject():
                 return None
         else:
             h = Heracles.http_handler.http_handler()
-            data = h.request(self.url, data=self.paras)
+
+            try:
+                data = h.request(self.url, data=self.paras)
+            except Heracles.http_handler.HTTPError as errno:
+                logging.debug(errno)
+                return "PROXY FAIL"
 
         for bad in self.bads:
             if bad in data:

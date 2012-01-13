@@ -7,7 +7,7 @@ Author(s):
     v0mit: v0mit@darkpy.net
 """
 
-__version__ = "1.1"
+__version__ = "0.1"
 
 import sys, argparse, logging, Queue, time, os
 from attack_thread import AttackThread
@@ -127,11 +127,13 @@ class Heracles():
                 logging.error(errno)
                 sys.exit(1)
 
-            for proxy in proxy_file:
-                self.proxy.append(proxy)
+            while len(self.proxy) < len(self.login_details):
+                for proxy in proxy_file:
+                    self.proxy.append(proxy)
 
             return
 
+        #Fill the list when no proxy is used.
         self.proxy = [None for i in range(len(self.login_details))]
 
     def loadLogins(self):
@@ -170,7 +172,10 @@ class Heracles():
 
         for details in dictionary_file:
             details = details.strip()
-            user, passwd = details.split(":")
+            try:
+                user, passwd = details.split(":")
+            except ValueError:
+                continue
 
             self.login_details.append((user, passwd))
 
@@ -194,16 +199,19 @@ class Heracles():
             attack_object = protocols.get(self.options.get("protocol")).AttackObject(
                 self.options, l_lvl=self.logging_lvl)
         except KeyError:
-            logging.error("Invalid protocol \"{0}\".".format(
+            logging.error('Invalid protocol "{0}".'.format(
                 self.options.get("protocol")))
 
         logging.info("Starting attack against {0}".format(
             self.options.get("host")))
 
         attack_queue = Queue.Queue()
+        result_queue = Queue.Queue()
 
+        #Creating AttackThread's
         pool = [AttackThread(attack_queue, attack_object,
-            l_lvl=self.logging_lvl) for i in range(
+            result_queue, l_lvl=self.logging_lvl)
+            for i in range(
             self.options.get("max_threads"))]
 
         for thread in pool:
@@ -220,7 +228,30 @@ class Heracles():
             except IndexError as errno:
                 break
 
-        attack_queue.join()
+            if idx == len(self.proxy):
+                idx = 0
+
+        while True:
+            attack_queue.join()
+            try:
+                result = result_queue.get(True, 0.05)
+            except Queue.Empty:
+                break
+
+            #If we are getting a PROXY FAIL and are using a single proxy, issue a
+            #a warning.
+            if result[0] == "PROXY FAIL" and self.options.get("proxy"):
+                logging.warning("Seems like proxy or server is down.")
+
+            #Put untested info back into queue.
+            try:
+                attack_queue.put((result[1], self.proxy[idx]))
+            except IndexError as errno:
+                break
+
+            idx += 1
+            if idx == len(self.proxy):
+                idx = 0
 
 
 if __name__ == "__main__":

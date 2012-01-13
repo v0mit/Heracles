@@ -25,6 +25,7 @@ class AttackObject():
 
     def doLogin(self, user, passwd, proxy=None):
         if proxy:
+            print(proxy)
             #Testing if it is a HTTP proxy
             ip, port = proxy.split(":")
             if port in ["80", "8080", "3128"]: #Most HTTP proxies run on those ports.
@@ -42,7 +43,7 @@ class AttackObject():
                     except Heracles.http_handler.HTTPError as errno: #None worked, maybe proxy is down?
                         logging.debug(errno)
                         logging.debug("{0}:{1} failed.".format(user, passwd))
-                        return None
+                        return "PROXY FAIL"
             else:
                 try:    #Try it as a SOCK proxy first.
                     logging.debug("Passing proxy as SOCK2")
@@ -57,13 +58,13 @@ class AttackObject():
                     except Heracles.http_handler.HTTPError as errno:
                         logging.debug(errno)
                         logging.debug("{0}:{1} failed.".format(user, passwd))
-                        return None
+                        return "PROXY FAIL"
 
             try:
                 h.request(self.url, (user, passwd))
             except Heracles.http_handler.HTTPError as errno:
                 logging.debug(errno)
-                return None
+                return "PROXY FAIL"
 
         #Not using a proxy
         else:
@@ -73,7 +74,7 @@ class AttackObject():
                 h.request(self.url, (user, passwd))
             except Exception:
                 logging.debug("{0}:{1} failed.".format(user, passwd))
-                return None
+                return "PROXY FAIL"
 
         if h.code == 200: #A valid login returns HTTP code 200
             logging.info("Valid user found. {0}:{1}".format(user, passwd))

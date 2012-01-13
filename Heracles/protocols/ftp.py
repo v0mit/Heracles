@@ -6,7 +6,7 @@ Site:http://darkpy.net/python/Heracles/
 Author(s):
     v0mit: v0mit@darkpy.net
 """
-import logging, sys
+import logging, sys, socket
 from ftplib import FTP
 
 
@@ -23,6 +23,7 @@ class AttackObject():
 
     def doLogin(self, user, passwd, proxy=None):
 
+
         #Installing SOCK proxy
         if proxy:
             import socket
@@ -37,7 +38,11 @@ class AttackObject():
             socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, ip, int(port))
             socket.socket = socks.socksocket
 
-        ftp = FTP(self.address) #Connecting
+        try:
+            ftp = FTP(self.address, timeout=20) #Connecting
+        except socket.error as errno:
+            logging.debug(errno)
+            return "PROXY FAIL"
 
         try:
             ftp.login(user, passwd) #Try to login

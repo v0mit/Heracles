@@ -10,7 +10,7 @@ import threading, logging, Queue, sys
 
 
 class AttackThread(threading.Thread):
-    def __init__(self, attack_q, attack_object, l_lvl=20):
+    def __init__(self, attack_q, attack_object, result_queue, l_lvl=20):
         super(AttackThread, self).__init__()
         if l_lvl == 10:
             logging.basicConfig(stream=sys.stderr, level=l_lvl,
@@ -21,6 +21,7 @@ class AttackThread(threading.Thread):
 
         self.attack_q = attack_q
         self.attack_object = attack_object
+        self.result_queue = result_queue
 
         self.stopreq = threading.Event()
 
@@ -38,9 +39,12 @@ class AttackThread(threading.Thread):
             logging.debug("Trying {0}:{1}".format(user, passwd))
 
             if proxy:
-                self.attack_object.doLogin(user, passwd, proxy)
+                result = self.attack_object.doLogin(user, passwd, proxy)
             else:
-                self.attack_object.doLogin(user, passwd)
+                result = self.attack_object.doLogin(user, passwd)
+
+            if result == "PROXY FAIL":
+                self.result_queue.put(("PROXY FAIL", (user, passwd)))
 
             self.attack_q.task_done()
 
