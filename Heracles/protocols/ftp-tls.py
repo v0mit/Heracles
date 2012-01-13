@@ -7,7 +7,7 @@ Author(s):
     v0mit: v0mit@darkpy.net
 """
 import logging, sys
-from ftplib import FTP
+from ftplib import FTP_TLS
 
 
 class AttackObject():
@@ -37,13 +37,13 @@ class AttackObject():
             socket.socket = socks.socksocket
 
         try:
-            ftp = FTP(self.address, timeout=20) #Connecting
+            ftps = FTP_TLS(self.address, timeout=20) #Connecting
         except socket.error as errno:
             logging.debug(errno)
             return "PROXY FAIL"
 
         try:
-            ftp.login(user, passwd) #Try to login
+            ftps.login(user, passwd) #Try to login
         except Exception:
             logging.debug("{0}:{1} failed.".format(user, passwd))
             return None

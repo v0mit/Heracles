@@ -1,6 +1,6 @@
 """
 Project:Heracles
-Version:0.1
+Last-Edit:Fri 10 Jan 2012
 Site:http://darkpy.net/python/Heracles/
 
 Author(s):
