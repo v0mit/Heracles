@@ -48,7 +48,17 @@ PROXY_FILE:proxies.txt              #List of ip/address:port
 
 
 
-FTP
+FTP(ftp)
+Example FTP attack:
+python Heracles.py ftp.server.com ftp -d dictionary.txt -a proxies.txt
+HOST:ftp.server.com ftp   #FTP Server
+PROTOCOL:ftp
+DICTIONARY_FILE:dictionary.txt      #List of usernames:passwords
+PROXY_FILE:proxies.txt              #List of ip/address:port
+
+
+
+FTP-TLS(ftp-tls)
 Example FTP attack:
 python Heracles.py ftp.server.com ftp -d dictionary.txt -a proxies.txt
 HOST:ftp.server.com ftp   #FTP Server
